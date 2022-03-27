@@ -5,6 +5,9 @@ import com.example.webpos.model.Cart;
 import com.example.webpos.model.Item;
 import com.example.webpos.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 
@@ -41,7 +44,7 @@ public class PosServiceImp implements PosService, Serializable {
     @Override
     public Cart add(Cart cart, String productId, int amount) {
 
-        Product product = posDB.getProduct(productId);
+        var  product = posDB.getProduct(productId);
         if (product == null) return cart;
 
         cart.addItem(new Item(product, amount));
@@ -49,7 +52,9 @@ public class PosServiceImp implements PosService, Serializable {
     }
 
     @Override
+    @Cacheable(cacheNames = "products")
     public List<Product> products() {
+        System.out.println("get products");
         return posDB.getProducts();
     }
 }

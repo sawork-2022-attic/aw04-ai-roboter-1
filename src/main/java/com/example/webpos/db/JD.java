@@ -6,11 +6,16 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Repository
@@ -20,10 +25,12 @@ public class JD implements PosDB {
     private List<Product> products = null;
 
     @Override
+    @Cacheable(cacheNames = "jd")
     public List<Product> getProducts() {
         try {
-            if (products == null)
+            if (products == null) {
                 products = parseJD("Java");
+            }
         } catch (IOException e) {
             products = new ArrayList<>();
         }
@@ -31,6 +38,7 @@ public class JD implements PosDB {
     }
 
     @Override
+    @Cacheable(value = "JD_product", key = "#productId")
     public Product getProduct(String productId) {
         for (Product p : getProducts()) {
             if (p.getId().equals(productId)) {
@@ -40,11 +48,13 @@ public class JD implements PosDB {
         return null;
     }
 
+
     public static List<Product> parseJD(String keyword) throws IOException {
         //获取请求https://search.jd.com/Search?keyword=java
+        System.out.println("download");
         String url = "https://search.jd.com/Search?keyword=" + keyword;
         //解析网页
-        Document document = Jsoup.parse(new URL(url), 10000);
+        Document document = Jsoup.connect(url).get();
         //所有js的方法都能用
         Element element = document.getElementById("J_goodsList");
         //获取所有li标签
@@ -60,7 +70,7 @@ public class JD implements PosDB {
             String img = "https:".concat(el.getElementsByTag("img").eq(0).attr("data-lazy-img"));
             String price = el.getElementsByAttribute("data-price").text();
             String title = el.getElementsByClass("p-name").eq(0).text();
-            if (title.indexOf("，") >= 0)
+            if (title.contains("，"))
                 title = title.substring(0, title.indexOf("，"));
 
             Product product = new Product(id, title, Double.parseDouble(price), img);
