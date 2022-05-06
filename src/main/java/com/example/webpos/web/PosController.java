@@ -53,7 +53,7 @@ public class PosController {
     @GetMapping("/add")
     public String addByGet(@RequestParam(name = "pid") String pid, Model model) {
 
-        posService.add(cart, pid, 1);
+        posService.add(cart, Long.valueOf(pid), 1);
         model.addAttribute("products", posService.products());
         model.addAttribute("cart", cart);
         return "index";

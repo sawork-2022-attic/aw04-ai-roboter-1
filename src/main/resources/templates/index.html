@@ -112,7 +112,7 @@
 			<a class="btn-overlay" href="#"><i class="fa fa-search-plus"></i> Quick view</a>
 		</div>
 		<figcaption class="info-wrap">
-			<a href="#" class="title"><span th:text="${product.name}"></span></a>
+			<a href="#" class="title"><span th:text="${product.getTitle()}"></span></a>
 			<div class="action-wrap">
 				<a th:href="@{/add?pid={pid}(pid=${product.id})}" class="btn btn-primary btn-sm float-right"> <i
                         class="fa fa-cart-plus"></i> Add </a>
@@ -146,10 +146,10 @@
 <tr th:each="item : ${cart.items}">
 	<td>
 <figure class="media">
-	<div class="img-wrap"><img th:src="${item.product.image}"
+	<div class="img-wrap"><img th:src="${item.product..getImage()}"
                                class="img-thumbnail img-xs"></div>
 	<figcaption class="media-body">
-		<h6 class="title text-truncate"><span th:text="${item.product.name}"></span></h6>
+		<h6 class="title text-truncate"><span th:text="${item.product.getTitle()}"></span></h6>
 	</figcaption>
 </figure>
 	</td>

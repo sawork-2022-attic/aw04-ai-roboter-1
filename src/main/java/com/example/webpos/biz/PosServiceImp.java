@@ -1,5 +1,6 @@
 package com.example.webpos.biz;
 
+import com.example.webpos.db.AmazonDB;
 import com.example.webpos.db.PosDB;
 import com.example.webpos.model.Cart;
 import com.example.webpos.model.Item;
@@ -8,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 
@@ -18,13 +21,12 @@ import java.util.concurrent.ThreadLocalRandom;
 @Component
 public class PosServiceImp implements PosService, Serializable {
 
-    private PosDB posDB;
+    private AmazonDB amazonDB;
 
     @Autowired
-    public void setPosDB(PosDB posDB) {
-        this.posDB = posDB;
+    public void setAmazonDB(AmazonDB amazonDB) {
+        this.amazonDB = amazonDB;
     }
-
 
     @Override
     public Product randomProduct() {
@@ -42,19 +44,24 @@ public class PosServiceImp implements PosService, Serializable {
     }
 
     @Override
-    public Cart add(Cart cart, String productId, int amount) {
+    public Cart add(Cart cart, Long productId, int amount) {
 
-        var  product = posDB.getProduct(productId);
-        if (product == null) return cart;
+        var  product = amazonDB.findById(productId);
+        if (product.isEmpty()) return cart;
 
-        cart.addItem(new Item(product, amount));
+        cart.addItem(new Item(product.get(), amount));
         return cart;
     }
 
     @Override
-    @Cacheable(cacheNames = "products")
     public List<Product> products() {
+        // 默认返回前20个
         System.out.println("get products");
-        return posDB.getProducts();
+        return amazonDB.findAll(PageRequest.of(1, 20)).getContent();
+    }
+
+    @Override
+    public List<Product> getProductByPage(Pageable pageable) {
+        return amazonDB.findAll(pageable).getContent();
     }
 }

@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-@Repository
+//@Repository
 public class JD implements PosDB {
 
 
@@ -73,9 +73,10 @@ public class JD implements PosDB {
             if (title.contains("，"))
                 title = title.substring(0, title.indexOf("，"));
 
-            Product product = new Product(id, title, Double.parseDouble(price), img);
-
-            list.add(product);
+            // todo
+//            Product product = new Product(Long.valueOf(id), title, Double.parseDouble(price), img);
+//
+//            list.add(product);
         }
         return list;
     }
